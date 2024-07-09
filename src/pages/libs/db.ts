@@ -109,4 +109,4 @@ async function updateDb() {
 }
 
 updateDb()
-setInterval(updateDb, 1000 * 10) // update every 10 minutes
+setInterval(updateDb, 1000 * 6 * 10) // run every 10 minutes
