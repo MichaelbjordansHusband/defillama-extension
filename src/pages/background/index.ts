@@ -14,7 +14,7 @@ import {
   DEFILLAMA_DIRECTORY_API,
   PROTOCOL_TVL_THRESHOLD,
 } from "../libs/constants";
-import { getStorage } from "../libs/helpers";
+import { getStorage, setStorage } from "../libs/helpers";
 import { checkDomain } from "../libs/phishing-detector";
 
 startupTasks();
@@ -91,6 +91,16 @@ async function handlePhishingCheck() {
 }
 
 export async function updateProtocolsDb() {
+  const lastUpdate = await getStorage("local", "lastUpdate:protocols", 0);
+  const now = Date.now();
+  if (now - lastUpdate < 4 * 60 * 60 * 1000) {
+    console.log("updateProtocolsDb", "last update was less than 4 hours ago, skipping");
+    return;
+  }
+
+  console.log("updateProtocolsDb", "start");
+  await setStorage("local", "lastUpdate:protocols", now);
+
   const raw = await fetch(PROTOCOLS_API).then((res) => res.json());
   const protocols = (raw["protocols"]?.map((x: any) => ({
     name: x.name,
@@ -110,7 +120,16 @@ export async function updateProtocolsDb() {
 }
 
 export async function updateDomainDbs() {
+  const lastUpdate = await getStorage("local", "lastUpdate:domains", 0);
+  const now = Date.now();
+  if (now - lastUpdate < 4 * 60 * 60 * 1000) {
+    console.log("updateDomainDbs", "last update was less than 4 hours ago, skipping");
+    return;
+  }
+
   console.log("updateDomainDbs", "start");
+  await setStorage("local", "lastUpdate:domains", now);
+
   const rawProtocols = await fetch(PROTOCOLS_API).then((res) => res.json());
   const protocols = (
     (rawProtocols["protocols"]?.map((x: any) => ({
