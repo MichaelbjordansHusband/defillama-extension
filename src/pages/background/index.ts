@@ -28,7 +28,7 @@ async function getCurrentTab() {
 async function handlePhishingCheck() {
   const phishingDetector = await getStorage("local", "settings:phishingDetector", true);
   if (!phishingDetector) {
-    await Browser.action.setIcon({ path: cute });
+    Browser.action.setIcon({ path: cute });
     return;
   }
 
@@ -202,7 +202,7 @@ export async function updateDomainDbs() {
 Browser.tabs.onUpdated.addListener(async (tabId, onUpdatedInfo, tab) => {
   // console.log("onUpdated", onUpdatedInfo.status, onUpdatedInfo.url);
   if (onUpdatedInfo.status === "complete" && tab.active) {
-    await Browser.tabs.sendMessage(tabId, { message: "TabUpdated" });
+    Browser.tabs.sendMessage(tabId, { message: "TabUpdated" });
   }
   await handlePhishingCheck();
 });
@@ -210,26 +210,30 @@ Browser.tabs.onUpdated.addListener(async (tabId, onUpdatedInfo, tab) => {
 // monitor tab activations, when the user switches to a different tab that was already open but not active
 Browser.tabs.onActivated.addListener(async (onActivatedInfo) => {
   // console.log("onActivated");
-  await Browser.tabs.sendMessage(onActivatedInfo.tabId, { message: "TabActivated" });
+  Browser.tabs.sendMessage(onActivatedInfo.tabId, { message: "TabActivated" });
   await handlePhishingCheck();
 });
 
 async function setupUpdateProtocolsDb() {
   console.log("setupUpdateProtocolsDb");
-  await Browser.alarms.clear("updateProtocolsDb");
-
-  console.log("setupUpdateProtocolsDb", "create");
-  await updateProtocolsDb();
-  Browser.alarms.create("updateProtocolsDb", { periodInMinutes: 4 * 60 }); // update once every 4 hours
+  Browser.alarms.get("updateProtocolsDb").then((a) => {
+    if (!a) {
+      console.log("setupUpdateProtocolsDb", "create");
+      updateProtocolsDb();
+      Browser.alarms.create("updateProtocolsDb", { periodInMinutes: 4 * 60 }); // update once every 4 hours
+    }
+  });
 }
 
 async function setupUpdateDomainDbs() {
   console.log("setupUpdateDomainDbs");
-  await Browser.alarms.clear("updateDomainDbs");
-
-  console.log("setupUpdateDomainDbs", "create");
-  await updateDomainDbs();
-  Browser.alarms.create("updateDomainDbs", { periodInMinutes: 4 * 60 }); // update once every 4 hours
+  Browser.alarms.get("updateDomainDbs").then((a) => {
+    if (!a) {
+      console.log("setupUpdateDomainDbs", "create");
+      updateDomainDbs();
+      Browser.alarms.create("updateDomainDbs", { periodInMinutes: 4 * 60 }); // update once every 4 hours
+    }
+  });
 }
 
 function startupTasks() {
