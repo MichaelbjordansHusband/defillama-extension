@@ -1,5 +1,8 @@
 import { fetchData } from './storage'
 import { version } from '../../../package.json'
+import Browser from "webextension-polyfill";
+import cute from "@assets/img/memes/cute-128.png";
+
 import {
   PROTOCOLS_API,
   METAMASK_LIST_CONFIG_API,
@@ -44,7 +47,7 @@ async function getData() {
   const protocolDomains = protocols
     .map((x) => {
       try {
-        if(!x.url) return null;
+        if (!x.url) return null;
         return new URL(x.url).hostname.replace("www.", "");
       } catch (error) {
         console.log("updateDomainDbs", "error", error);
@@ -109,4 +112,23 @@ async function updateDb() {
 }
 
 updateDb()
-setInterval(updateDb, 1000 * 6 * 10) // run every 10 minutes
+// setInterval(updateDb, 1000 * 6 * 10) // run every 10 minutes
+Browser.alarms.create("updateDomainDbs", { periodInMinutes: 6 * 60 }); // update every 6 hours
+
+Browser.alarms.onAlarm.addListener(async (a) => {
+  switch (a.name) {
+    case "updateDomainDbs":
+      await updateDb();
+      break;
+  }
+})
+
+async function startupTasks() {
+  console.time("startupTasks");
+  await updateDb();
+  Browser.action.setIcon({ path: cute });
+  console.timeEnd("startupTasks");
+}
+
+Browser.runtime.onInstalled.addListener(startupTasks)
+Browser.runtime.onStartup.addListener(startupTasks)
