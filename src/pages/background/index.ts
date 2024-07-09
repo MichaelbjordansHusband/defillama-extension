@@ -93,8 +93,9 @@ async function handlePhishingCheck() {
 export async function updateProtocolsDb() {
   const lastUpdate = await getStorage("local", "lastUpdate:protocols", 0);
   const now = Date.now();
-  if (now - lastUpdate < 4 * 60 * 60 * 1000) {
-    console.log("updateProtocolsDb", "last update was less than 4 hours ago, skipping");
+  const diff = now - lastUpdate;
+  if (diff < 4 * 60 * 60 * 1000) {
+    console.log("updateProtocolsDb", `last update was less than ${Math.ceil(diff / 1000 / 60)} minutes ago, skipping`);
     return;
   }
 
@@ -122,8 +123,9 @@ export async function updateProtocolsDb() {
 export async function updateDomainDbs() {
   const lastUpdate = await getStorage("local", "lastUpdate:domains", 0);
   const now = Date.now();
-  if (now - lastUpdate < 4 * 60 * 60 * 1000) {
-    console.log("updateDomainDbs", "last update was less than 4 hours ago, skipping");
+  const diff = now - lastUpdate;
+  if (diff < 4 * 60 * 60 * 1000) {
+    console.log("updateDomainDbs", `last update was less than ${Math.ceil(diff / 1000 / 60)} minutes ago, skipping`);
     return;
   }
 
@@ -240,6 +242,8 @@ function startupTasks() {
   console.log("startupTasks", "start");
   setupUpdateProtocolsDb();
   setupUpdateDomainDbs();
+  updateProtocolsDb();
+  updateDomainDbs();
   Browser.action.setIcon({ path: cute });
   console.log("startupTasks", "done");
 }
