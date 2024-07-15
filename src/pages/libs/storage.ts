@@ -35,10 +35,10 @@ export async function fetchData({
   console.log("Updating storage data for", key)
 
   isUpdating[key] = true;
-  currentData[key] = fetchData()
+  currentData[key] = _fetchData()
   return currentData[key]
 
-  async function fetchData(): Promise<any> {
+  async function _fetchData(): Promise<any> {
     let data = {}
     try {
       const cookieKey = 'llama.fi-' + key
