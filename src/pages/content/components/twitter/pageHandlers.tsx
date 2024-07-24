@@ -107,6 +107,7 @@ export async function handleTweetStatusPage({ twitterCashTags, twitterHashTags, 
     } else {
       handleAdTweet(tweet);
 
+      /* disabling this as scammers stopped using it
       // if the tweet text content consists of only numbers, then it's sus. Add red background the tweet
       const onlyNumbers = /^[0-9]+$/.test(tweetText)
       // it is not number but probably gibberish word
@@ -115,6 +116,7 @@ export async function handleTweetStatusPage({ twitterCashTags, twitterHashTags, 
         handleSusTweet(tweet, isLinkedTweet, "onlyNumbers", "BG_RED");
         return;
       }
+       */
 
       // only hide addresses if not from the op
       if (!!tweetText) handleTweetWithAddress(tweet, tweetText, isLinkedTweet);
